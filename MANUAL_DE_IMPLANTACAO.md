@@ -67,7 +67,47 @@ Controla configuração do Chatwoot: Rails, banco, Redis e MinIO.
 
 ## 3. Procedimento de Implantação (Deploy)
 
-### 3.1. Pré-Deploy (apenas na primeira vez)
+### 3.1. Configurar os Arquivos de Ambiente (OBRIGATÓRIO)
+
+> ⚠️ O repositório **não inclui** os arquivos `.env` (são ignorados pelo `.gitignore` por segurança). Você **deve** criá-los a partir dos exemplos antes de subir a stack.
+
+```bash
+# 1. Copiar os arquivos de exemplo:
+cp .env.example .env
+cp Chatwoot/.env.example Chatwoot/.env
+
+# 2. Gerar um SECRET_KEY_BASE seguro para o Chatwoot:
+openssl rand -hex 64
+# Cole o resultado no campo SECRET_KEY_BASE do Chatwoot/.env
+
+# 3. Editar o .env raiz com os dados do seu ambiente:
+nano .env
+# Substitua todos os valores "CHANGE_ME_*" por valores reais
+
+# 4. Editar o Chatwoot/.env:
+nano Chatwoot/.env
+# Substitua todos os valores "CHANGE_ME_*" e ajuste os domínios (SEU_DOMINIO.com)
+```
+
+**Campos obrigatórios a ajustar no `.env`:**
+- `SERVER_URL` → URL pública da Evolution API (ex: `https://evolution.meudominio.com`)
+- `POSTGRES_PASSWORD` → senha forte
+- `REDIS_PASSWORD` → senha forte (copie para `CACHE_REDIS_URI` também)
+- `DATABASE_CONNECTION_URI` → atualize com a mesma `POSTGRES_PASSWORD`
+- `CHATWOOT_IMPORT_DATABASE_CONNECTION_URI` → idem
+- `AUTHENTICATION_API_KEY` → gere um UUID: `python3 -c "import uuid; print(uuid.uuid4())"`
+- `N8N_ENCRYPTION_KEY` → gere com: `openssl rand -hex 32`
+- `MINIO_ROOT_USER` e `MINIO_ROOT_PASSWORD` → credenciais do MinIO
+
+**Campos obrigatórios a ajustar no `Chatwoot/.env`:**
+- `SECRET_KEY_BASE` → resultado do `openssl rand -hex 64`
+- `FRONTEND_URL` → URL pública do Chatwoot (ex: `https://atendimento.meudominio.com`)
+- `POSTGRES_PASSWORD` → mesma senha do `.env` raiz
+- `REDIS_PASSWORD` e `REDIS_URL` → mesma senha do `.env` raiz
+- `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` → mesmos que `MINIO_ROOT_USER/PASSWORD`
+- `AWS_S3_ENDPOINT` / `STORAGE_ENDPOINT` → URL pública do MinIO (ex: `https://minio.meudominio.com`)
+
+### 3.2. Pré-Deploy de Infraestrutura (apenas na primeira vez)
 
 ```bash
 # 1. Criar a rede Docker compartilhada (se não existir):
@@ -77,7 +117,7 @@ docker network create stack_network
 ss -tlnp | grep -E '9006|9007'
 ```
 
-### 3.2. Deploy ou Atualização
+### 3.3. Deploy ou Atualização
 
 ```bash
 # Parar containers (mantém volumes de dados):
@@ -90,7 +130,7 @@ docker compose up -d
 docker compose logs -f
 ```
 
-### 3.3. Aguardar Inicialização
+### 3.4. Aguardar Inicialização
 
 | Serviço | Tempo estimado | O que acontece |
 |---|---|---|
@@ -106,7 +146,7 @@ docker logs -f chatwoot_web
 docker compose ps
 ```
 
-### 3.4. Setup Inicial (Primeira Execução)
+### 3.5. Setup Inicial (Primeira Execução)
 
 1. Acesse `https://atendimento.projetoravenna.cloud` → Crie a conta administrador
 2. Acesse `https://n8n.projetoravenna.cloud` → Configure usuário e senha

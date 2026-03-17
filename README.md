@@ -164,14 +164,22 @@ cd Automacao-BackBone
 
 ### 2. Configurar variáveis de ambiente
 
-Edite o `.env` na raiz do projeto e o `Chatwoot/.env` com os valores do seu ambiente:
+> ⚠️ O repositório **não inclui** os arquivos `.env` por segurança. Crie-os a partir dos exemplos:
 
 ```bash
-# Gere um SECRET_KEY_BASE seguro para o Chatwoot:
+# Copiar os exemplos:
+cp .env.example .env
+cp Chatwoot/.env.example Chatwoot/.env
+
+# Gerar o SECRET_KEY_BASE para o Chatwoot:
 openssl rand -hex 64
+
+# Editar com os valores do seu ambiente:
+nano .env          # ajuste todos os CHANGE_ME_*, SERVER_URL e domínios
+nano Chatwoot/.env # ajuste todos os CHANGE_ME_*, FRONTEND_URL, S3_ENDPOINT e domínios
 ```
 
-> ⚠️ **Nunca** use as senhas padrão (`postgres`, `redis`, `minioadmin`, `password`) em produção.
+Consulte o **[MANUAL_DE_IMPLANTACAO.md](./MANUAL_DE_IMPLANTACAO.md)** (seção 3.1) para a lista completa de campos obrigatórios.
 
 ### 3. Criar a rede Docker (apenas na primeira vez)
 
