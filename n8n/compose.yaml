@@ -30,11 +30,7 @@ services:
       DB_POSTGRESDB_USER: postgres
       DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
-      # N8N_HOST: n8n.projetohavoc.shop
-      # N8N_EDITOR_BASE_URL: https://n8n.projetohavoc.shop/
-      # N8N_PROTOCOL: https
       NODE_ENV: production
-      # WEBHOOK_URL: https://n8n.projetoravenna.cloud/
       WEBHOOK_URL: https://n8n.projetoravenna.cloud/
       N8N_EDITOR_BASE_URL: https://n8n.projetoravenna.cloud/
       N8N_BASIC_AUTH_ACTIVE: ${N8N_BASIC_AUTH_ACTIVE}

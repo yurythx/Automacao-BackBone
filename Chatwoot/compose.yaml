@@ -77,12 +77,18 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d chatwoot_production"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   redis:
     image: redis:7-alpine
     container_name: chatwoot_redis
     restart: always
-    command: ["redis-server", "--requirepass", "redis"]
+    command: ["redis-server", "--requirepass", "redis", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
     networks:
@@ -92,6 +98,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a redis ping | grep PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   stack_network:
