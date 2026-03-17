@@ -1,0 +1,11 @@
+name: automacao-backbone
+
+include:
+  - Chatwoot/compose.yaml
+  - evolution/compose.yaml
+  - minio/compose.yaml
+  - n8n/compose.yaml
+
+networks:
+  stack_network:
+    external: true
