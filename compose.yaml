@@ -6,6 +6,29 @@ include:
   - minio/compose.yaml
   - n8n/compose.yaml
 
+services:
+  # ──────────────────────────────────────────────────────────
+  # TUNNEL CONNECTOR
+  # Conecta o backbone_tunnel (Cloudflare) à stack_network
+  # automaticamente toda vez que a stack sobe.
+  # Roda uma vez e encerra — não deixa container rodando.
+  # ──────────────────────────────────────────────────────────
+  tunnel_connector:
+    image: docker:cli
+    container_name: tunnel_connector
+    restart: "no"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      sh -c "
+        echo '[tunnel_connector] Conectando backbone_tunnel à stack_network...' &&
+        docker network connect stack_network backbone_tunnel 2>/dev/null &&
+        echo '[tunnel_connector] Conectado com sucesso!' ||
+        echo '[tunnel_connector] Já estava conectado (ok).'
+      "
+    networks:
+      - stack_network
+
 networks:
   stack_network:
     external: true
