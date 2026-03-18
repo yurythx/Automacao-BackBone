@@ -13,6 +13,9 @@ services:
       - chatwoot_data:/app/storage
     networks:
       - stack_network
+    extra_hosts:
+      - "minio.projetoravenna.cloud:host-gateway"
+      - "atendimento.projetoravenna.cloud:host-gateway"
     logging:
       driver: "json-file"
       options:

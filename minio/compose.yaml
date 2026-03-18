@@ -20,6 +20,11 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_API_CORS_ALLOW_ORIGIN: "*"
+      # CRÍTICO: Define a URL pública para geração de URLs presignadas.
+      # Sem isso, o MinIO usa o hostname interno (backbone_minio_automation)
+      # que o browser não consegue resolver (ERR_NAME_NOT_RESOLVED).
+      MINIO_SERVER_URL: "https://minio.projetoravenna.cloud"
+      MINIO_BROWSER_REDIRECT_URL: "https://minio.projetoravenna.cloud"
     volumes:
       - s3_data:/data
     restart: unless-stopped
