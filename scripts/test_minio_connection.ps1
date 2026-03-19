@@ -4,7 +4,7 @@ $accessKey = 'minioadmin'
 $secretKey = 'minioadmin'
 $region = 'us-east-1'
 $service = 's3'
-$endpoint = 'http://192.168.29.71:9004'
+$endpoint = 'https://minio.projetoravenna.cloud'
 
 # Function to calculate HMAC-SHA256
 function Get-HmacSha256 {
