@@ -8,7 +8,8 @@ include:
 services:
   # ──────────────────────────────────────────────────────────
   # MINIO SETUP SYNC
-  # Agora rodando diretamente na rede backbone_internal para garantir o bucket.
+  # Serviço que garante que os buckets necessários existam no
+  # MinIO da stack principal (backbone_minio).
   # ──────────────────────────────────────────────────────────
   minio_setup_sync:
     image: minio/mc:latest
@@ -20,19 +21,33 @@ services:
       - /bin/sh
       - -c
       - |
-        # Configura o alias para o MinIO (backbone_minio é o hostname na rede backbone_internal)
+        # Aguarda a estabilização da rede interna (Docker DNS)
+        echo "[minio_setup] Aguardando estabilização da rede..."
+        sleep 5
+        
+        # Configura o alias para o MinIO da stack principal (backbone_minio)
         mc alias set primary_minio http://backbone_minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
         
-        echo "[minio_setup] Garantindo bucket '${S3_BUCKET:-chatwoot}'..."
-        mc mb --ignore-existing primary_minio/${S3_BUCKET:-chatwoot}
-        
-        echo "[minio_setup] Configurando pasta pública..."
-        mc mb --ignore-existing primary_minio/${S3_BUCKET:-chatwoot}/public
-        mc anonymous set public primary_minio/${S3_BUCKET:-chatwoot}/public
-        
-        echo "[minio_setup] Bucket pronto no MinIO do servidor!"
+        echo "[minio_setup] Verificando conexão..."
+        if mc admin info primary_minio > /dev/null 2>&1; then
+            echo "[minio_setup] Conectado ao MinIO principal com sucesso!"
+            
+            echo "[minio_setup] Garantindo bucket '${S3_BUCKET:-chatwoot}'..."
+            mc mb --ignore-existing primary_minio/${S3_BUCKET:-chatwoot}
+            
+            echo "[minio_setup] Configurando pasta pública..."
+            mc mb --ignore-existing primary_minio/${S3_BUCKET:-chatwoot}/public
+            mc anonymous set public primary_minio/${S3_BUCKET:-chatwoot}/public
+            
+            echo "[minio_setup] Bucket e permissões configurados!"
+        else
+            echo "[minio_setup] ERRO: Não foi possível conectar ao backbone_minio:9000"
+            echo "Certifique-se de que a stack do Backbone está rodando e na rede backbone_internal."
+            exit 1
+        fi
         exit 0
 
 networks:
+  # Esta rede DEVE ser a mesma utilizada pela stack principal do Backbone.
   backbone_internal:
     external: true
