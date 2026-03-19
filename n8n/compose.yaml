@@ -13,7 +13,7 @@ services:
       - n8n_data:/home/node/.n8n
       - tmp_data:/home/n8n/.tmp
     networks:
-      - stack_network
+      - backbone_internal
     logging:
       driver: "json-file"
       options:
@@ -73,7 +73,7 @@ services:
     volumes:
       - postgres_n8n_data:/var/lib/postgresql/data
     networks:
-      - stack_network
+      - backbone_internal
     restart: always
     logging:
       driver: "json-file"
@@ -102,7 +102,7 @@ services:
     volumes:
       - redis_n8n_data:/data
     networks:
-      - stack_network
+      - backbone_internal
     restart: always
     logging:
       driver: "json-file"
@@ -133,5 +133,5 @@ volumes:
 
 
 networks:
-  stack_network:
+  backbone_internal:
     external: true

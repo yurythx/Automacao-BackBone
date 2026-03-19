@@ -12,10 +12,7 @@ services:
     volumes:
       - chatwoot_data:/app/storage
     networks:
-      - stack_network
-    extra_hosts:
-      - "minio.projetoravenna.cloud:host-gateway"
-      - "atendimento.projetoravenna.cloud:host-gateway"
+      - backbone_internal
     logging:
       driver: "json-file"
       options:
@@ -78,7 +75,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     networks:
-      - stack_network
+      - backbone_internal
     logging:
       driver: "json-file"
       options:
@@ -101,7 +98,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - stack_network
+      - backbone_internal
     logging:
       driver: "json-file"
       options:
@@ -115,7 +112,7 @@ services:
       start_period: 30s
 
 networks:
-  stack_network:
+  backbone_internal:
     external: true
 
 volumes:

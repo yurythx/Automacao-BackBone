@@ -40,7 +40,7 @@ services:
       - CACHE_REDIS_SAVE_INSTANCES=${CACHE_REDIS_SAVE_INSTANCES}
       - CACHE_LOCAL_ENABLED=${CACHE_LOCAL_ENABLED}
     networks:
-      - stack_network
+      - backbone_internal
     ports:
       - "${EVOLUTION_PORT}:8080"
     volumes:
@@ -76,7 +76,7 @@ services:
     volumes:
       - postgres_evolution_data:/var/lib/postgresql/data
     networks:
-      - stack_network
+      - backbone_internal
     restart: always
     logging:
       driver: "json-file"
@@ -105,7 +105,7 @@ services:
     volumes:
       - redis_evolution_data:/data
     networks:
-      - stack_network
+      - backbone_internal
     restart: always
     logging:
       driver: "json-file"
@@ -134,5 +134,5 @@ volumes:
   redis_evolution_data:
 
 networks:
-  stack_network:
+  backbone_internal:
     external: true
