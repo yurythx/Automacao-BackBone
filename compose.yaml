@@ -50,4 +50,5 @@ services:
 networks:
   # Esta rede DEVE ser a mesma utilizada pela stack principal do Backbone.
   backbone_internal:
+    name: backbone_internal
     external: true
