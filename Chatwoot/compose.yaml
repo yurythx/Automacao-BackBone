@@ -24,6 +24,9 @@ services:
     profiles: []
     container_name: chatwoot_web
     restart: always
+    extra_hosts:
+      # Força o Chatwoot a falar com o MinIO via rede interna mesmo usando o domínio público
+      - "minio.projetoravenna.cloud:172.24.0.3"
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,6 +50,9 @@ services:
     profiles: []
     container_name: chatwoot_worker
     restart: always
+    extra_hosts:
+      # Essencial para que o worker crie as miniaturas sem erro 500
+      - "minio.projetoravenna.cloud:172.24.0.3"
     depends_on:
       postgres:
         condition: service_healthy
