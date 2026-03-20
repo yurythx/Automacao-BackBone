@@ -4,32 +4,8 @@ $accessKey = 'minioadmin'
 $secretKey = 'minioadmin'
 $region = 'us-east-1'
 $service = 's3'
-$endpoint = 'https://minio.projetoravenna.cloud'
-
-# Function to calculate HMAC-SHA256
-function Get-HmacSha256 {
-    param($Key, $Data)
-    $hmac = New-Object System.Security.Cryptography.HMACSHA256
-    $hmac.Key = $Key
-    return $hmac.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Data))
-}
-
-# Function to calculate Hex string
-function Get-HexString {
-    param($Bytes)
-    return [BitConverter]::ToString($Bytes).Replace('-', '').ToLower()
-}
-
-# Date and Time
-$date = Get-Date
-$amzDate = $date.ToUniversalTime().ToString("yyyyMMddTHHmmssZ")
-$dateStamp = $date.ToUniversalTime().ToString("yyyyMMdd")
-
-# Canonical Request
-$method = 'GET'
-$canonicalUri = '/'
-$canonicalQueryString = ''
-$canonicalHeaders = "host:minio.projetoravenna.cloud`nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`nx-amz-date:$amzDate`n"
+$endpoint = 'http://backbone_minio:9000'
+$canonicalHeaders = "host:backbone_minio:9000`nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`nx-amz-date:$amzDate`n"
 $signedHeaders = 'host;x-amz-content-sha256;x-amz-date'
 $payloadHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' # Empty payload hash
 $canonicalRequest = "$method`n$canonicalUri`n$canonicalQueryString`n$canonicalHeaders`n$signedHeaders`n$payloadHash"

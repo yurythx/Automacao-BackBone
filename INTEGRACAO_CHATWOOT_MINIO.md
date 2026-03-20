@@ -36,10 +36,9 @@ As variáveis críticas no Chatwoot para esta integração são:
 # Ativa o backend S3
 ACTIVE_STORAGE_SERVICE=s3_compatible
 
-# Configuração do Endpoint Interno
-AWS_S3_ENDPOINT=http://backbone_minio:9000
-STORAGE_ENDPOINT=http://backbone_minio:9000
-STORAGE_PROXY=true
+# Configuração do Endpoint
+AWS_S3_ENDPOINT=https://minio.projetoravenna.cloud
+STORAGE_ENDPOINT=https://minio.projetoravenna.cloud
 
 # Bucket e Credenciais
 S3_BUCKET_NAME=chatwoot
