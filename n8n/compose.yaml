@@ -134,5 +134,5 @@ volumes:
 
 networks:
   backbone_internal:
-    name: backbone_internal
+    name: backbone_backbone_internal
     external: true
