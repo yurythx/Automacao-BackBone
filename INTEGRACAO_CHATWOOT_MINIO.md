@@ -21,10 +21,10 @@ Nesta stack, **não criamos um novo MinIO**. Em vez disso, conectamos o Chatwoot
 
 ## 2. Comunicação e Portas
 
-A comunicação é híbrida para garantir máxima performance e compatibilidade:
+A comunicação é feita pela rede interna, e o Chatwoot serve os anexos em modo proxy:
 
-- **Interna (Container → MinIO):** O Chatwoot acessa `http://backbone_minio:9000`. Isso evita problemas de DNS e sobrecarga no proxy reverso.
-- **Externa (Navegador → MinIO):** O navegador do usuário acessa os arquivos via `https://minio.projetoravenna.cloud`. O MinIO está configurado para gerar essas URLs automaticamente.
+- **Interna (Chatwoot → MinIO):** O Chatwoot acessa `http://backbone_minio:9000` para upload/download.
+- **Externa (Navegador → Chatwoot):** O navegador acessa os anexos via `https://atendimento.projetoravenna.cloud/rails/active_storage/...` (proxy), sem precisar resolver `backbone_minio`.
 
 ---
 
@@ -36,9 +36,13 @@ As variáveis críticas no Chatwoot para esta integração são:
 # Ativa o backend S3
 ACTIVE_STORAGE_SERVICE=s3_compatible
 
-# Configuração do Endpoint
-AWS_S3_ENDPOINT=https://minio.projetoravenna.cloud
-STORAGE_ENDPOINT=https://minio.projetoravenna.cloud
+# Configuração do Endpoint (interno Docker)
+AWS_S3_ENDPOINT=http://backbone_minio:9000
+STORAGE_ENDPOINT=http://backbone_minio:9000
+DIRECT_UPLOADS_ENABLED=false
+STORAGE_PROXY=true
+ACTIVE_STORAGE_URL_STRATEGY=proxy
+ACTIVE_STORAGE_HOST=https://atendimento.projetoravenna.cloud
 
 # Bucket e Credenciais
 S3_BUCKET_NAME=chatwoot

@@ -4,9 +4,12 @@
 $ErrorActionPreference = 'Stop'
 
 # Configurações
-$baseUrl = "https://atendimento.projetoravenna.cloud"
-$accountId = 1
-$token = "CDuFU9XcuoXTF7uHarDFWCw3"
+$baseUrl = if ($env:CHATWOOT_BASE_URL) { $env:CHATWOOT_BASE_URL } else { "https://atendimento.projetoravenna.cloud" }
+$accountId = if ($env:CHATWOOT_ACCOUNT_ID) { [int]$env:CHATWOOT_ACCOUNT_ID } else { 1 }
+$token = $env:CHATWOOT_API_TOKEN
+if (-not $token) {
+    throw "Defina CHATWOOT_API_TOKEN no ambiente para executar este teste."
+}
 $headers = @{ "api_access_token" = $token }
 $sampleFile = "sample_upload.txt"
 
@@ -92,26 +95,30 @@ try {
     }
     Write-Host "Upload Sucesso! URL: $attachmentUrl" -ForegroundColor Green
 
-    # 5. Validar Redirecionamento (O Teste Real)
-    Print-Step "Validando Redirecionamento (Chatwoot -> MinIO)..."
+    # 5. Validar Entrega do Arquivo
+    Print-Step "Validando entrega do arquivo (proxy/redirect)..."
     
     # Fazemos uma request sem seguir redirect para ver o 302
     $check = Invoke-WebRequest -Uri $attachmentUrl -Headers $headers -MaximumRedirection 0 -ErrorAction SilentlyContinue
     
-    if ($check.StatusCode -eq 302 -or $check.StatusCode -eq 301) {
+    if ($check.StatusCode -eq 200) {
+        Write-Host "Entrega OK (proxy)!" -ForegroundColor Green
+        Write-Host "URL: $attachmentUrl"
+    } elseif ($check.StatusCode -eq 302 -or $check.StatusCode -eq 301) {
         $target = $check.Headers['Location']
         Write-Host "Redirecionamento OK!" -ForegroundColor Green
         Write-Host "De: $attachmentUrl"
         Write-Host "Para: $target"
         
-        if ($target -match "minio.projetoravenna.cloud") {
-            Write-Host "✅ O destino aponta corretamente para o domínio do MinIO." -ForegroundColor Green
+        if ($target -match "backbone_minio") {
+            Write-Host "❌ O destino aponta para backbone_minio (inacessível no navegador)." -ForegroundColor Red
+        } elseif ($target -match "minio.projetoravenna.cloud") {
+            Write-Host "✅ O destino aponta para o domínio público do MinIO." -ForegroundColor Green
         } else {
-            Write-Host "⚠️ O destino não parece ser o MinIO (minio.projetoravenna.cloud). Verifique a URL." -ForegroundColor Yellow
+            Write-Host "⚠️ O destino não parece ser o MinIO público. Verifique a URL." -ForegroundColor Yellow
         }
     } else {
-        Write-Host "❌ Falha: O Chatwoot não redirecionou. Status: $($check.StatusCode)" -ForegroundColor Red
-        Write-Host "Isso indica que o arquivo pode estar sendo servido localmente (Disk) ou proxy incorreto."
+        Write-Host "❌ Falha ao buscar o arquivo. Status: $($check.StatusCode)" -ForegroundColor Red
     }
 
 } catch {

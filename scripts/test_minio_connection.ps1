@@ -1,43 +1,27 @@
+$ErrorActionPreference = 'Stop'
 
-Add-Type -AssemblyName System.Net.Http
-$accessKey = 'minioadmin'
-$secretKey = 'minioadmin'
-$region = 'us-east-1'
-$service = 's3'
-$endpoint = 'http://backbone_minio:9000'
-$canonicalHeaders = "host:backbone_minio:9000`nx-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`nx-amz-date:$amzDate`n"
-$signedHeaders = 'host;x-amz-content-sha256;x-amz-date'
-$payloadHash = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' # Empty payload hash
-$canonicalRequest = "$method`n$canonicalUri`n$canonicalQueryString`n$canonicalHeaders`n$signedHeaders`n$payloadHash"
+$minioPublicUrl = if ($env:MINIO_PUBLIC_URL) { $env:MINIO_PUBLIC_URL } else { 'https://minio.projetoravenna.cloud' }
+$chatwootOrigin = if ($env:CHATWOOT_ORIGIN) { $env:CHATWOOT_ORIGIN } else { 'https://atendimento.projetoravenna.cloud' }
 
-# String to Sign
-$algorithm = 'AWS4-HMAC-SHA256'
-$credentialScope = "$dateStamp/$region/$service/aws4_request"
-$stringToSign = "$algorithm`n$amzDate`n$credentialScope`n$(Get-HexString -Bytes ([System.Security.Cryptography.SHA256]::Create().ComputeHash([System.Text.Encoding]::UTF8.GetBytes($canonicalRequest))))"
-
-# Signature
-$kDate = Get-HmacSha256 -Key ([System.Text.Encoding]::UTF8.GetBytes("AWS4$secretKey")) -Data $dateStamp
-$kRegion = Get-HmacSha256 -Key $kDate -Data $region
-$kService = Get-HmacSha256 -Key $kRegion -Data $service
-$kSigning = Get-HmacSha256 -Key $kService -Data 'aws4_request'
-$signature = Get-HexString -Bytes (Get-HmacSha256 -Key $kSigning -Data $stringToSign)
-
-# Authorization Header
-$authorization = "$algorithm Credential=$accessKey/$credentialScope, SignedHeaders=$signedHeaders, Signature=$signature"
-$authorization = $authorization -replace "`r", "" -replace "`n", ""
-
-# Request
-$client = New-Object System.Net.Http.HttpClient
-$request = New-Object System.Net.Http.HttpRequestMessage([System.Net.Http.HttpMethod]::Get, $endpoint)
-$request.Headers.Add('x-amz-date', $amzDate)
-$request.Headers.Add('x-amz-content-sha256', $payloadHash)
-$request.Headers.TryAddWithoutValidation('Authorization', $authorization) | Out-Null
+Write-Host "MinIO URL: $minioPublicUrl"
+Write-Host "Origin:   $chatwootOrigin"
 
 try {
-    $response = $client.SendAsync($request).Result
-    Write-Host "StatusCode: $($response.StatusCode)"
-    $content = $response.Content.ReadAsStringAsync().Result
-    Write-Host "Content: $content"
+    $cors = Invoke-WebRequest -Uri $minioPublicUrl -Method Options -Headers @{
+        Origin = $chatwootOrigin
+        'Access-Control-Request-Method' = 'PUT'
+    }
+    Write-Host "CORS StatusCode: $($cors.StatusCode)"
+    Write-Host "Access-Control-Allow-Origin: $($cors.Headers['Access-Control-Allow-Origin'])"
+    Write-Host "Access-Control-Allow-Methods: $($cors.Headers['Access-Control-Allow-Methods'])"
 } catch {
-    Write-Host "Error: $_"
+    Write-Host "CORS check failed: $($_.Exception.Message)"
+}
+
+try {
+    $healthUrl = ($minioPublicUrl.TrimEnd('/') + '/minio/health/live')
+    $health = Invoke-WebRequest -Uri $healthUrl -Method Get
+    Write-Host "Health StatusCode: $($health.StatusCode)"
+} catch {
+    Write-Host "Health check failed: $($_.Exception.Message)"
 }
