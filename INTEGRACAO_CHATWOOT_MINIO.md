@@ -13,9 +13,9 @@ Nesta stack, **não criamos um novo MinIO**. Em vez disso, conectamos o Chatwoot
 | Componente | Papel |
 |---|---|
 | **Chatwoot** | Plataforma de atendimento — envia arquivos via rede interna. |
-| **MinIO** | Container `backbone_minio` — armazena os arquivos. |
+| **MinIO** | Container principal (referenciado via `${AWS_S3_ENDPOINT_URL}`) |
 | **Rede** | `backbone_internal` — permite comunicação direta sem sair para a internet. |
-| **Bucket** | `chatwoot` (gerenciado pelo serviço `minio_setup_sync`). |
+| **Bucket** | `${AWS_STORAGE_BUCKET_NAME}` (gerenciado pelo serviço `minio_setup_sync`). |
 
 ---
 
@@ -23,8 +23,8 @@ Nesta stack, **não criamos um novo MinIO**. Em vez disso, conectamos o Chatwoot
 
 A comunicação é feita pela rede interna, e o Chatwoot serve os anexos em modo proxy:
 
-- **Interna (Chatwoot → MinIO):** O Chatwoot acessa `http://backbone_minio:9000` para upload/download.
-- **Externa (Navegador → Chatwoot):** O navegador acessa os anexos via `https://atendimento.projetoravenna.cloud/rails/active_storage/...` (proxy), sem precisar resolver `backbone_minio`.
+- **Interna (Chatwoot → MinIO):** O Chatwoot acessa o endpoint definido em `${AWS_S3_ENDPOINT_URL}` para upload/download.
+- **Externa (Navegador → Chatwoot):** O navegador acessa os anexos via `https://atendimento.projetoravenna.cloud/rails/active_storage/...` (proxy), sem precisar resolver o MinIO diretamente.
 
 ---
 
@@ -37,18 +37,17 @@ As variáveis críticas no Chatwoot para esta integração são:
 ACTIVE_STORAGE_SERVICE=s3_compatible
 
 # Configuração do Endpoint (interno Docker)
-AWS_S3_ENDPOINT=http://backbone_minio:9000
-STORAGE_ENDPOINT=http://backbone_minio:9000
-DIRECT_UPLOADS_ENABLED=false
+S3_ENDPOINT=${AWS_S3_ENDPOINT_URL}
+AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT_URL}
 STORAGE_PROXY=true
 ACTIVE_STORAGE_URL_STRATEGY=proxy
 ACTIVE_STORAGE_HOST=https://atendimento.projetoravenna.cloud
 
 # Bucket e Credenciais
-S3_BUCKET_NAME=chatwoot
-AWS_ACCESS_KEY_ID=minioadmin
-AWS_SECRET_ACCESS_KEY=minioadmin
-AWS_REGION=us-east-1
+S3_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
+AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+AWS_REGION=${AWS_S3_REGION_NAME}
 AWS_S3_FORCE_PATH_STYLE=true
 ```
 
@@ -57,7 +56,7 @@ AWS_S3_FORCE_PATH_STYLE=true
 ## 4. Gerenciamento Automatizado de Bucket
 
 O serviço **`minio_setup_sync`** no `compose.yaml` raiz garante a infraestrutura:
-- Ele verifica se o bucket `chatwoot` existe no MinIO principal.
+- Ele verifica se o bucket definido em `${AWS_STORAGE_BUCKET_NAME}` existe no MinIO principal.
 - Ele cria a pasta `/public` necessária.
 - Ele define a política de acesso como **pública** para a pasta de arquivos comuns.
 

@@ -21,14 +21,14 @@ services:
       - |
         echo "[minio_setup] Aguardando rede do Backbone..."
         sleep 5
-        # backbone_minio está na rede backbone_backbone_internal
-        mc alias set primary_minio http://backbone_minio:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
+        # Conectando ao MinIO usando as novas variáveis
+        mc alias set primary_minio ${AWS_S3_ENDPOINT_URL} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
         
         if mc admin info primary_minio > /dev/null 2>&1; then
             echo "[minio_setup] Conectado ao MinIO principal!"
-            mc mb --ignore-existing primary_minio/${S3_BUCKET:-chatwoot}
-            mc mb --ignore-existing primary_minio/${S3_BUCKET:-chatwoot}/public
-            mc anonymous set public primary_minio/${S3_BUCKET:-chatwoot}/public
+            mc mb --ignore-existing primary_minio/${AWS_STORAGE_BUCKET_NAME}
+            mc mb --ignore-existing primary_minio/${AWS_STORAGE_BUCKET_NAME}/public
+            mc anonymous set public primary_minio/${AWS_STORAGE_BUCKET_NAME}/public
             echo "[minio_setup] Pronto!"
         else
             echo "[minio_setup] Erro de conexão com backbone_minio"
