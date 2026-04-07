@@ -1,0 +1,65 @@
+services:
+  # ──────────────────────────────────────────────────────────
+  # LOCAL MINIO SERVICE
+  # ──────────────────────────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: backbone_minio
+    restart: always
+    env_file:
+      - ../.env
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - backbone_internal
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    init: true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # ──────────────────────────────────────────────────────────
+  # MINIO SETUP SYNC
+  # ──────────────────────────────────────────────────────────
+  minio_setup_sync:
+    image: minio/mc:latest
+    container_name: minio_setup_sync
+    env_file:
+      - ../.env
+    depends_on:
+      minio:
+        condition: service_healthy
+    networks:
+      - backbone_internal
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        echo "[minio_setup] Aguardando MinIO interno..."
+        # Conectando ao MinIO local usando as variáveis do .env
+        mc alias set primary_minio ${AWS_S3_ENDPOINT_URL} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
+        
+        if mc admin info primary_minio > /dev/null 2>&1; then
+            echo "[minio_setup] Conectado ao MinIO local!"
+            mc mb --ignore-existing primary_minio/${AWS_STORAGE_BUCKET_NAME}
+            mc mb --ignore-existing primary_minio/${AWS_STORAGE_BUCKET_NAME}/public
+            mc anonymous set public primary_minio/${AWS_STORAGE_BUCKET_NAME}/public
+            echo "[minio_setup] Balde e permissões configurados!"
+        else
+            echo "[minio_setup] Erro ao conectar no MinIO interno"
+            exit 1
+        fi
+        exit 0
+
+networks:
+  backbone_internal:
+    name: backbone_backbone_internal
+    external: true
+
+volumes:
+  minio_data:

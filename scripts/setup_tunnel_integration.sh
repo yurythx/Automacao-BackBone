@@ -66,7 +66,7 @@ fi
 echo ""
 echo -e "${YELLOW}[3/4] Verificando containers da stack...${NC}"
 
-CONTAINERS=("chatwoot_web:3000" "n8n:5678" "evolution_api:8080" "backbone_minio_automation:9000")
+CONTAINERS=("chatwoot_web:3000" "n8n:5678" "evolution_api:8080" "backbone_minio:9001")
 ALL_OK=true
 
 for ENTRY in "${CONTAINERS[@]}"; do
@@ -93,15 +93,13 @@ echo -e "${BLUE}Configure as seguintes rotas em:${NC}"
 echo -e "${BLUE}https://one.dash.cloudflare.com → Zero Trust → Networks → Tunnels → tunel_VPS → Public Hostname${NC}"
 echo ""
 echo -e "  ┌─────────────────────────────────────────────────────────────────────────────────┐"
-echo -e "  │  DOMÍNIO                               PATH   SERVIÇO                           │"
-echo -e "  ├─────────────────────────────────────────────────────────────────────────────────┤"
-echo -e "  │  projetoravenna.cloud                  *      http://backbone_frontend:3005      │"
-echo -e "  │  api.projetoravenna.cloud              *      http://backbone_backend:8005       │"
-echo -e "  │  atendimento.projetoravenna.cloud      *      http://chatwoot_web:3000           │"
-echo -e "  │  n8n.projetoravenna.cloud              *      http://n8n:5678                   │"
-echo -e "  │  evolution.projetoravenna.cloud        *      http://evolution_api:8080          │"
-echo -e "  │  minio.projetoravenna.cloud            *      http://backbone_minio_automation:9000│"
-echo -e "  └─────────────────────────────────────────────────────────────────────────────────┘"
+|  DOMÍNIO                               PATH   SERVIÇO                           │"
+|  atendimento.projetoravenna.cloud      *      http://chatwoot_web:3000           │"
+|  n8n.projetoravenna.cloud              *      http://n8n:5678                   │"
+|  evolution.projetoravenna.cloud        *      http://evolution_api:8080          │"
+|  minio.projetoravenna.cloud            *      http://backbone_minio:9001        │"
+|  └─────────────────────────────────────────────────────────────────────────────────┘"
+
 echo ""
 
 if [ "$ALL_OK" = true ]; then

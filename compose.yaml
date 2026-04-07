@@ -4,40 +4,12 @@ include:
   - Chatwoot/compose.yaml
   - evolution/compose.yaml
   - n8n/compose.yaml
+  - minio/compose.yaml
 
 services:
-  # ──────────────────────────────────────────────────────────
-  # MINIO SETUP SYNC
-  # ──────────────────────────────────────────────────────────
-  minio_setup_sync:
-    image: minio/mc:latest
-    container_name: minio_setup_sync
-    env_file: .env
-    networks:
-      - backbone_internal
-    entrypoint:
-      - /bin/sh
-      - -c
-      - |
-        echo "[minio_setup] Aguardando rede do Backbone..."
-        sleep 5
-        # Conectando ao MinIO usando as novas variáveis
-        mc alias set primary_minio ${AWS_S3_ENDPOINT_URL} ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD}
-        
-        if mc admin info primary_minio > /dev/null 2>&1; then
-            echo "[minio_setup] Conectado ao MinIO principal!"
-            mc mb --ignore-existing primary_minio/${AWS_STORAGE_BUCKET_NAME}
-            mc mb --ignore-existing primary_minio/${AWS_STORAGE_BUCKET_NAME}/public
-            mc anonymous set public primary_minio/${AWS_STORAGE_BUCKET_NAME}/public
-            echo "[minio_setup] Pronto!"
-        else
-            echo "[minio_setup] Erro de conexão com backbone_minio"
-            exit 1
-        fi
-        exit 0
+  # Services are now managed in their respective subdirectories
 
 networks:
   backbone_internal:
-    # MAPEAMENTO REAL: Faz o seu compose.yaml entrar na rede do Túnel do Backbone
     name: backbone_backbone_internal
     external: true

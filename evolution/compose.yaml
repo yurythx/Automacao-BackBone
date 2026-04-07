@@ -51,6 +51,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    init: true
     deploy:
       resources:
         limits:

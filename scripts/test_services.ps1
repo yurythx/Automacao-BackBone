@@ -3,7 +3,7 @@ param(
   [string]$RedisContainer = "redis_n8n",
   [string]$PostgresDb = "n8n_fila",
   [string]$PostgresUser = "postgres",
-  [string]$RedisPassword = "redis"
+  [string]$RedisPassword = "backbone_redis_pass_2026"
 )
 
 Write-Output "Testando Postgres..."

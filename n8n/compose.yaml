@@ -1,6 +1,6 @@
 services:
   n8n:
-    image: n8nio/n8n:2.8.3
+    image: ${N8N_IMAGE}
     container_name: n8n
     depends_on:
       postgres_n8n:
@@ -48,6 +48,7 @@ services:
       EXECUTIONS_DATA_MAX_AGE: 336
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
       N8N_SECURE_COOKIE: "false"
+    init: true
     deploy:
       resources:
         limits:
@@ -125,14 +126,14 @@ services:
       retries: 3
       start_period: 30s
 
+networks:
+  backbone_internal:
+    name: backbone_backbone_internal
+    external: true
+
 volumes:
   n8n_data:
   tmp_data:
   postgres_n8n_data:
   redis_n8n_data:
 
-
-networks:
-  backbone_internal:
-    name: backbone_backbone_internal
-    external: true

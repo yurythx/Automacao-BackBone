@@ -1,94 +1,55 @@
 # 🚀 Automacao-BackBone
 
 > 🚨 **DOCUMENTAÇÃO OFICIAL DO AMBIENTE (projetoravenna.cloud)** 🚨
-> Para detalhes específicos desta implantação (domínios, credenciais, scripts de validação), consulte o:
-> 👉 **[MANUAL DE IMPLANTAÇÃO E OPERAÇÃO](./MANUAL_DE_IMPLANTACAO.md)** 👈
+> Toda a documentação detalhada foi migrada para a pasta **`doc/`**.
+> Utilize o manual de implantação como ponto de partida:
+> 👉 **[MANUAL DE IMPLANTAÇÃO E OPERAÇÃO](./doc/01-manual-implantacao.md)** 👈
 
-Stack de **Atendimento Omnichannel + Automação de Processos**, orquestrada via Docker Compose. Composta por **Chatwoot**, **Evolution API** e **n8n**, integrada à rede principal do projeto Backbone (**`backbone_internal`**).
-
-O projeto é modular, seguro e utiliza o **MinIO principal** do servidor para armazenamento persistente de mídias, garantindo consistência de dados e economia de recursos.
-
----
-
-## 🏛 Arquitetura da Solução
-
-Todos os serviços compartilham a **rede Docker do Backbone** (`backbone_internal`), o que permite comunicação direta via DNS interno (nome do serviço) sem a necessidade de proxies manuais ou conectores bridge.
-
-- ✅ **Isolamento de Dados:** Cada serviço possui seu próprio Postgres e Redis dedicados.
-- ✅ **Storage Centralizado:** Utiliza o container `backbone_minio` pré-existente no servidor.
-- ✅ **Comunicação Nativa:** Integração direta entre Chatwoot (via API) e Evolution API.
+Stack de **Atendimento Omnichannel + Automação de Processos**, orquestrada via Docker Compose. Composta por **Chatwoot**, **Evolution API** e **n8n**, operando com **MinIO Local Dedicado** e as versões mais estáveis de Abril 2026.
 
 ---
 
-## 🔄 Fluxograma de Dados
+## 🏗️ Arquitetura Modular
 
-```mermaid
-graph TD
-    classDef external fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef internal fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
-    classDef db fill:#fff3e0,stroke:#ef6c00,stroke-width:1px;
-    classDef main fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+A solução agora é 100% modular, independente e focada em performance através da comunicação interna simplificada via Docker DNS.
 
-    User(("Usuário / Agente")):::external
-    Customer(("Cliente WhatsApp")):::external
-
-    subgraph Backbone_Net ["☁️ backbone_internal (Rede Unificada Docker)"]
-        direction TB
-
-        EvolAPI["📱 Evolution API v2\n(Porta: 8081)"]:::internal
-        n8n["⚡ n8n 2.8.3\n(Porta: 5678)"]:::internal
-        Chatwoot["💬 Chatwoot v4.11.0\n(Porta: 3000)"]:::internal
-        
-        MinIOBackbone["🗄️ MinIO Principal\n(Hostname: backbone_minio)"]:::main
-
-        PostgresEvol[("Postgres Evolution")]:::db
-        PostgresN8N[("Postgres n8n")]:::db
-        PostgresChat[("Postgres Chatwoot")]:::db
-    end
-
-    User -->|Acesso Web| Chatwoot
-    Customer -->|Mensagens WhatsApp| EvolAPI
-
-    EvolAPI -->|"Integração Nativa"| Chatwoot
-    Chatwoot -.->|"Upload/Download"| MinIOBackbone
-    n8n -->|API| EvolAPI
-    n8n -->|API| Chatwoot
-```
+- ✅ **Isolamento Total:** Cada serviço (com seu BD/Cache) reside em sua própria pasta.
+- ✅ **Storage Dedicado:** MinIO local exclusivo da stack para mídias e backups.
+- ✅ **Segurança:** Credenciais únicas e senhas fortes rotacionadas em toda a stack.
+- ✅ **Rede Interna:** Comunicação nativa entre Chatwoot/n8n/Evolution sem sair para a internet.
 
 ---
 
-## 🧩 Componentes da Stack
+## 🛠️ O que está incluído (Versões estáveis)
 
-### 1. Chatwoot `v4.11.0`
-- **Função:** Plataforma de atendimento (WhatsApp, Live Chat, Email).
-- **Storage:** Persistência no MinIO principal (`chatwoot` bucket).
-
-### 2. Evolution API `v2.3.7`
-- **Função:** Gateway WhatsApp baseado na biblioteca Baileys. Conecta aparelhos celulares.
-
-### 3. n8n `2.8.3`
-- **Função:** Hub de automação Low-Code. Orquestra fluxos entre sistemas.
+| Componente | Versão | Pasta |
+|---|---|---|
+| **Chatwoot** | `v4.12.1` | `Chatwoot/` |
+| **Evolution API** | `v2.3.7` | `evolution/` |
+| **n8n (Versão 2)** | `v2.16.0` | `n8n/` |
+| **MinIO (Local)** | `Latest` | `minio/` |
 
 ---
 
-## 📂 Estrutura de Diretórios (Atualizada)
+## 📂 Guias e Documentação Completa (`doc/`)
 
-```plaintext
-Automacao-BackBone/
-├── compose.yaml                    # Orquestrador raiz unificado
-├── .env                            # Variáveis globais (DNS, passwords)
-├── Chatwoot/
-│   ├── compose.yaml                # Chatwoot Web + Worker + DBs
-│   └── .env                        # Variáveis Chatwoot (Rails, S3)
-├── evolution/
-│   └── compose.yaml                # Evolution API + DBs
-├── n8n/
-│   └── compose.yaml                # n8n + DBs
-├── scripts/                        # Scripts de diagnóstico e validação
-├── MANUAL_DE_IMPLANTACAO.md        # ⭐ Referência primária
-└── INTEGRACAO_CHATWOOT_MINIO.md    # Guia detalhado S3 (Externo)
-```
+Abaixo estão os guias detalhados para cada parte da integração:
+
+1.  **[Manual de Operação](./doc/01-manual-implantacao.md):** Deploy, saúde e comandos rápidos.
+2.  **[Integração MinIO (Storage)](./doc/02-integracao-chatwoot-minio.md):** Configurações de mídia persistente.
+3.  **[Integração n8n (Webhooks)](./doc/03-integracao-chatwoot-n8n.md):** Comunicação Chatwoot ↔ n8n via API interna.
+4.  **[Integração WhatsApp](./doc/04-integracao-whatsapp.md):** Como conectar números via Evolution API.
+5.  **[Plano de Refatoração](./doc/05-plano-refatoracao.md):** Detalhes da migração realizada em Abril 2026.
 
 ---
 
-*Repositório mantido para a solução Automacao-BackBone — 2026.*
+## 🚀 Como Iniciar
+
+1.  Configure o arquivo `.env` a partir do template: `cp .env.example .env`.
+2.  Ajuste as credenciais no arquivo gerado.
+3.  Suba a stack: `docker compose up -d`.
+4.  Consulte o **[Manual](./doc/01-manual-implantacao.md)** para validação.
+
+---
+
+*Repositório refatorado e mantido em Abril de 2026 — Stack Automacao-BackBone.*

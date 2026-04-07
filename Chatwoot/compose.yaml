@@ -1,6 +1,6 @@
 services:
   base: &base
-    image: chatwoot/chatwoot:v4.11.0
+    image: chatwoot/chatwoot:v4.12.1
     profiles: ["donotstart"]
     env_file:
       - ../.env
@@ -33,6 +33,7 @@ services:
       - "3000:3000"
     entrypoint: docker/entrypoints/rails.sh
     command: ['sh', '-c', 'bundle exec rails db:prepare && bundle exec rails s -p 3000 -b 0.0.0.0']
+    init: true
     deploy:
       resources:
         limits:
@@ -41,6 +42,12 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   worker:
     <<: *base
@@ -53,6 +60,7 @@ services:
       redis:
         condition: service_healthy
     command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    init: true
     deploy:
       resources:
         limits:
@@ -61,9 +69,15 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep sidekiq | grep -v grep || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   postgres:
-    image: pgvector/pgvector:pg15
+    image: pgvector/pgvector:pg16
     container_name: chatwoot_db
     restart: always
     volumes:
