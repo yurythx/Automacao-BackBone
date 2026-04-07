@@ -6,9 +6,6 @@ include:
   - n8n/compose.yaml
   - minio/compose.yaml
 
-services:
-  # Services are now managed in their respective subdirectories
-
 networks:
   backbone_internal:
     name: backbone_backbone_internal
