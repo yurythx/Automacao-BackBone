@@ -5,36 +5,44 @@ services:
     env_file:
       - ../.env
     environment:
-      - NODE_ENV=production
-      - RAILS_ENV=production
-      - INSTALLATION_ENV=docker
-      # Database Connectivity
-      - POSTGRES_HOST=chatwoot_db
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=chatwoot_production
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@chatwoot_redis:6379
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      # Rails Configuration
+      NODE_ENV: production
+      RAILS_ENV: production
+      INSTALLATION_ENV: docker
+      
+      # Database Configuration
+      POSTGRES_HOST: chatwoot_db
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: chatwoot_production
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: postgres
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      
+      # Redis Configuration
+      REDIS_URL: redis://:${REDIS_PASSWORD}@chatwoot_redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      
       # Storage (MinIO Local)
-      - ACTIVE_STORAGE_SERVICE=s3_compatible
-      - STORAGE_PROXY=true
-      - ACTIVE_STORAGE_URL_STRATEGY=proxy
-      - S3_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME}
-      - S3_ENDPOINT=${AWS_S3_ENDPOINT_URL}
-      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT_URL}
-      - S3_FORCE_PATH_STYLE=true
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_REGION=${AWS_S3_REGION_NAME}
+      ACTIVE_STORAGE_SERVICE: s3_compatible
+      STORAGE_PROXY: "true"
+      ACTIVE_STORAGE_URL_STRATEGY: proxy
+      S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME}
+      S3_ENDPOINT: ${AWS_S3_ENDPOINT_URL}
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT_URL}
+      S3_FORCE_PATH_STYLE: "true"
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_S3_REGION_NAME}
+      
       # Frontend & Security
-      - FRONTEND_URL=https://${CHATWOOT_DOMAIN}
-      - ACTIVE_STORAGE_HOST=https://${CHATWOOT_DOMAIN}
-      - RAILS_ASSET_HOST=https://${CHATWOOT_DOMAIN}
-      - CABLE_URL=wss://${CHATWOOT_DOMAIN}/cable
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - FORCE_SSL=${FORCE_SSL:-true}
-      - TRUSTED_PROXIES=0.0.0.0/0
+      FRONTEND_URL: https://${CHATWOOT_DOMAIN}
+      ACTIVE_STORAGE_HOST: https://${CHATWOOT_DOMAIN}
+      RAILS_ASSET_HOST: https://${CHATWOOT_DOMAIN}
+      CABLE_URL: wss://${CHATWOOT_DOMAIN}/cable
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      FORCE_SSL: ${FORCE_SSL:-true}
+      TRUSTED_PROXIES: 0.0.0.0/0
     volumes:
       - chatwoot_data:/app/storage
     networks:
@@ -53,6 +61,8 @@ services:
     restart: always
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "3000:3000"
@@ -81,6 +91,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
     deploy:
       resources:
@@ -106,10 +118,10 @@ services:
     env_file:
       - ../.env
     environment:
-      - POSTGRES_DB=chatwoot_production
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+      POSTGRES_DB: chatwoot_production
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     networks:
       - backbone_internal
     logging:
