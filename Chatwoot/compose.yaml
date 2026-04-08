@@ -23,38 +23,28 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@chatwoot_redis:6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       
-      # Storage (MinIO Local)
+      # Storage (MinIO via Domínio Público)
       ACTIVE_STORAGE_SERVICE: s3_compatible
       STORAGE_PROXY: true
-      ACTIVE_STORAGE_URL_STRATEGY: proxy
       
-      # COMUNICAÇÃO INTERNA (Upload do Servidor)
-      # Usamos o nome do serviço para garantir 100% de sucesso no upload
-      S3_ENDPOINT: http://minio:9000
-      AWS_S3_ENDPOINT: http://minio:9000
-      STORAGE_ENDPOINT: http://minio:9000
+      # ENDPOINT PÚBLICO: Isso força o Chatwoot a gerar links que o navegador resolve
+      S3_ENDPOINT: https://minio.projetoravenna.cloud
+      AWS_S3_ENDPOINT: https://minio.projetoravenna.cloud
       
-      # LINK EXTERNO (O que o seu navegador verá)
-      S3_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
-      STORAGE_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
+      # Alias para redundância
+      S3_ALIAS_URL: https://minio.projetoravenna.cloud
       
       S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
       S3_BUCKET: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
-      STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
       
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-admin}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-CHANGE_ME_DATABASE_PASSWORD}
-      STORAGE_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-admin}
-      STORAGE_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-CHANGE_ME_DATABASE_PASSWORD}
       
       AWS_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
       AWS_DEFAULT_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
       S3_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
-      STORAGE_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
       
       S3_FORCE_PATH_STYLE: true
-      AWS_S3_FORCE_PATH_STYLE: true
-      STORAGE_FORCE_PATH_STYLE: true
       
       # Frontend & Security
       FRONTEND_URL: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
@@ -88,7 +78,8 @@ services:
     ports:
       - "3000:3000"
     entrypoint: docker/entrypoints/rails.sh
-    command: ['sh', '-c', 'bundle exec rails db:prepare && bundle exec rails s -p 3000 -b 0.0.0.0']
+    # Adicionado rake tmp:clear para limpar caches de links antigos
+    command: ['sh', '-c', 'bundle exec rails db:prepare && bundle exec rake tmp:clear && bundle exec rails s -p 3000 -b 0.0.0.0']
     deploy:
       resources:
         limits:
