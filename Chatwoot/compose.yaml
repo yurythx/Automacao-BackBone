@@ -25,17 +25,15 @@ services:
       
       # Storage (MinIO Local)
       ACTIVE_STORAGE_SERVICE: s3_compatible
-      STORAGE_PROXY: "true"
+      STORAGE_PROXY: true
       ACTIVE_STORAGE_URL_STRATEGY: proxy
       
-      # Endpoint Interno (Para Upload do Backend)
-      S3_ENDPOINT: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
-      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
-      STORAGE_ENDPOINT: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
-      
-      # Alias Público (Para o Navegador do Usuário resolver via Túnel)
-      S3_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
-      STORAGE_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
+      # Endpoint Unificado (Graças ao alias de rede no MinIO)
+      # Usamos HTTP internamente para evitar erros de certificado no Docker, 
+      # e a Cloudflare cuida do HTTPS para o navegador.
+      S3_ENDPOINT: http://minio.projetoravenna.cloud
+      AWS_S3_ENDPOINT: http://minio.projetoravenna.cloud
+      STORAGE_ENDPOINT: http://minio.projetoravenna.cloud
       
       S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
       S3_BUCKET: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
@@ -51,9 +49,9 @@ services:
       S3_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
       STORAGE_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
       
-      S3_FORCE_PATH_STYLE: "true"
-      AWS_S3_FORCE_PATH_STYLE: "true"
-      STORAGE_FORCE_PATH_STYLE: "true"
+      S3_FORCE_PATH_STYLE: true
+      AWS_S3_FORCE_PATH_STYLE: true
+      STORAGE_FORCE_PATH_STYLE: true
       
       # Frontend & Security
       FRONTEND_URL: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
@@ -61,7 +59,7 @@ services:
       RAILS_ASSET_HOST: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
       CABLE_URL: wss://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}/cable
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      FORCE_SSL: ${FORCE_SSL:-true}
+      FORCE_SSL: true
       TRUSTED_PROXIES: 0.0.0.0/0
     volumes:
       - chatwoot_data:/app/storage
