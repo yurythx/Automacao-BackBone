@@ -38,11 +38,10 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-admin}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-CHANGE_ME_DATABASE_PASSWORD}
       
-      # HARDCODED REGION (Para evitar o erro MissingRegionError de vez)
+      # Hardcoded fallback values
       AWS_REGION: us-east-1
       AWS_DEFAULT_REGION: us-east-1
       S3_REGION: us-east-1
-      AWS_S3_REGION: us-east-1
       
       S3_FORCE_PATH_STYLE: true
       
@@ -78,7 +77,8 @@ services:
     ports:
       - "3000:3000"
     entrypoint: docker/entrypoints/rails.sh
-    command: ['sh', '-c', 'bundle exec rails db:prepare && bundle exec rake tmp:clear && bundle exec rails s -p 3000 -b 0.0.0.0']
+    # Injeção via shell export garante que o Rails veja a variável antes de iniciar
+    command: ['sh', '-c', 'export AWS_REGION=us-east-1 && export AWS_DEFAULT_REGION=us-east-1 && bundle exec rails db:prepare && bundle exec rake tmp:clear && bundle exec rails s -p 3000 -b 0.0.0.0']
     deploy:
       resources:
         limits:
@@ -104,7 +104,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
+    command: ['sh', '-c', 'export AWS_REGION=us-east-1 && export AWS_DEFAULT_REGION=us-east-1 && bundle exec sidekiq -C config/sidekiq.yml']
     deploy:
       resources:
         limits:
