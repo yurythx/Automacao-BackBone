@@ -28,12 +28,15 @@ services:
       STORAGE_PROXY: true
       ACTIVE_STORAGE_URL_STRATEGY: proxy
       
-      # Endpoint Unificado (Graças ao alias de rede no MinIO)
-      # Usamos HTTP internamente para evitar erros de certificado no Docker, 
-      # e a Cloudflare cuida do HTTPS para o navegador.
-      S3_ENDPOINT: http://minio.projetoravenna.cloud
-      AWS_S3_ENDPOINT: http://minio.projetoravenna.cloud
-      STORAGE_ENDPOINT: http://minio.projetoravenna.cloud
+      # COMUNICAÇÃO INTERNA (Upload do Servidor)
+      # Usamos o nome do serviço para garantir 100% de sucesso no upload
+      S3_ENDPOINT: http://minio:9000
+      AWS_S3_ENDPOINT: http://minio:9000
+      STORAGE_ENDPOINT: http://minio:9000
+      
+      # LINK EXTERNO (O que o seu navegador verá)
+      S3_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
+      STORAGE_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
       
       S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
       S3_BUCKET: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
