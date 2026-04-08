@@ -28,19 +28,23 @@ services:
       STORAGE_PROXY: "true"
       ACTIVE_STORAGE_URL_STRATEGY: proxy
       
-      # S3 Config (Multiple variations for compatibility)
-      S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
-      S3_BUCKET: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
-      STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
-      
+      # Endpoint Interno (Para Upload do Backend)
       S3_ENDPOINT: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
       STORAGE_ENDPOINT: ${AWS_S3_ENDPOINT_URL:-http://minio:9000}
       
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-backbone_minio_root_2026}
-      STORAGE_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-minioadmin}
-      STORAGE_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-backbone_minio_root_2026}
+      # Alias Público (Para o Navegador do Usuário resolver via Túnel)
+      S3_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
+      STORAGE_ALIAS_URL: https://${MINIO_DOMAIN:-minio.projetoravenna.cloud}
+      
+      S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
+      S3_BUCKET: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
+      STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
+      
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-admin}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-CHANGE_ME_DATABASE_PASSWORD}
+      STORAGE_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-admin}
+      STORAGE_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-CHANGE_ME_DATABASE_PASSWORD}
       
       AWS_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
       AWS_DEFAULT_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
@@ -52,10 +56,10 @@ services:
       STORAGE_FORCE_PATH_STYLE: "true"
       
       # Frontend & Security
-      FRONTEND_URL: https://${CHATWOOT_DOMAIN}
-      ACTIVE_STORAGE_HOST: https://${CHATWOOT_DOMAIN}
-      RAILS_ASSET_HOST: https://${CHATWOOT_DOMAIN}
-      CABLE_URL: wss://${CHATWOOT_DOMAIN}/cable
+      FRONTEND_URL: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
+      ACTIVE_STORAGE_HOST: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
+      RAILS_ASSET_HOST: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
+      CABLE_URL: wss://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}/cable
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       FORCE_SSL: ${FORCE_SSL:-true}
       TRUSTED_PROXIES: 0.0.0.0/0
