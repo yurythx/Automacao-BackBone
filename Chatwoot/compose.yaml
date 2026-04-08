@@ -27,11 +27,9 @@ services:
       ACTIVE_STORAGE_SERVICE: s3_compatible
       STORAGE_PROXY: true
       
-      # ENDPOINT PÚBLICO: Isso força o Chatwoot a gerar links que o navegador resolve
+      # ENDPOINT PÚBLICO
       S3_ENDPOINT: https://minio.projetoravenna.cloud
       AWS_S3_ENDPOINT: https://minio.projetoravenna.cloud
-      
-      # Alias para redundância
       S3_ALIAS_URL: https://minio.projetoravenna.cloud
       
       S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-backbone-media}
@@ -40,9 +38,11 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-admin}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-CHANGE_ME_DATABASE_PASSWORD}
       
-      AWS_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
-      AWS_DEFAULT_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
-      S3_REGION: ${AWS_S3_REGION_NAME:-us-east-1}
+      # Variáveis de Região (Múltiplas para garantir compatibilidade)
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_DEFAULT_REGION: ${AWS_REGION:-us-east-1}
+      S3_REGION: ${AWS_REGION:-us-east-1}
+      AWS_S3_REGION: ${AWS_REGION:-us-east-1}
       
       S3_FORCE_PATH_STYLE: true
       
@@ -51,7 +51,7 @@ services:
       ACTIVE_STORAGE_HOST: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
       RAILS_ASSET_HOST: https://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}
       CABLE_URL: wss://${CHATWOOT_DOMAIN:-atendimento.projetoravenna.cloud}/cable
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-56877bd0e6ea08129e843210456789abcdeffedcba098765432101234567890abcdef}
       FORCE_SSL: true
       TRUSTED_PROXIES: 0.0.0.0/0
     volumes:
@@ -78,7 +78,6 @@ services:
     ports:
       - "3000:3000"
     entrypoint: docker/entrypoints/rails.sh
-    # Adicionado rake tmp:clear para limpar caches de links antigos
     command: ['sh', '-c', 'bundle exec rails db:prepare && bundle exec rake tmp:clear && bundle exec rails s -p 3000 -b 0.0.0.0']
     deploy:
       resources:
